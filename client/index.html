@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Client</title>
+</head>
+<body>
+    <h1>WebSocket Client</h1>
+    
+    <button onclick="setPort(13,true)">13 on</button>
+    <button onclick="setPort(13,false)">13 off</button>
+    <p></p>
+    <button onclick="setPort(12,true)">12 on</button>
+    <button onclick="setPort(12,false)">12 off</button>
+    <p></p>
+    
+
+    <div>
+        <input type="text" id="messageInput" placeholder="Enter message">
+        <button onclick="sendMessage()">Send</button>
+    </div>
+    <div>
+        <h2>Messages</h2>
+        <pre id="messages"></pre>
+    </div>
+    <script>
+        const ws = new WebSocket('ws://localhost:3000');
+
+        ws.onopen = function() {
+            document.getElementById('messages').textContent += 'Connected to server\n';
+        };
+
+        ws.onmessage = function(event) {
+            console.log(event.data);
+            document.getElementById('messages').textContent += 'Received: ' + event.data + '\n';
+        };
+
+        ws.onclose = function() {
+            document.getElementById('messages').textContent += 'Disconnected from server\n';
+        };
+
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value;
+            ws.send(message);
+            document.getElementById('messages').textContent += 'Sent: ' + message + '\n';
+            input.value = '';
+        }
+
+        function setPort(number, status) {
+            ws.send(`${status?'on':'off'},${number}`);
+        }
+    </script>
+</body>
+</html>

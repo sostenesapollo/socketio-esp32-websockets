@@ -1,35 +1,24 @@
-var app = require('express')();
-var http = require('http').createServer(app);
-var io = require('socket.io')(http);
+const WebSocket = require('ws');
 
-app.get('/', function (req, res) {
-    res.send('<h1>Hello world</h1>');
-});
+const wss = new WebSocket.Server({ port: 3000 });
 
-// When the server receives a post request on /sendData
-app.post('/sendData', function (req, res) {
+wss.on('connection', function connection(ws) {
+    console.log('New client connected');
 
-    //send data to sockets.
-    io.sockets.emit('event', { message: "Hello from server!" })
-    
-    res.send({});
-});
+    ws.on('message', function incoming(message) {
+        console.log('Received message: %s', message);
 
-// When a new connection is requested
-io.on('connection', function (socket) {
-    console.log('User Connected!');
+        // Broadcast the message to all connected clients except the sender
+        wss.clients.forEach(function each(client) {
+            if (client !== ws && client.readyState === WebSocket.OPEN) {
+                client.send(`${message}`);
+            }
+        });
+    });
 
-    // Send to the connected user
-    socket.emit('event', { message: 'Connected !!!!' });
-    
-    // On each "status", run this function
-    socket.on('status', function (data) {
-        console.log(data);
+    ws.on('close', function() {
+        console.log('Client disconnected');
     });
 });
 
-// Listen to port 3000
-http.listen(3000, function () {
-    console.log('listening on *:3000');
-});
-
+console.log('WebSocket server is running on ws://localhost:3000');
