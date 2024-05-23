@@ -6,7 +6,7 @@ wss.on('connection', function connection(ws) {
     console.log('New client connected');
 
     ws.on('message', function incoming(message) {
-        console.log('Received message: %s', message);
+        // console.log('Received message: %s', message);
 
         // Broadcast the message to all connected clients except the sender
         wss.clients.forEach(function each(client) {
